@@ -34,7 +34,7 @@ Class PluginWhmsonic extends ServerPlugin {
             $this->url = $this->schema . $this->host .':'. $this->port .'/whmsonic/modules/api.php?';
 
         } else {
-            throw new CE_Exception("Missing Server Credentials: please fill out all information when editing the server.");
+            throw new CE_Exception('Missing Server Credentials: please fill out all information when editing the server.');
         }
     }
 
