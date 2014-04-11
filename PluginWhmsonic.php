@@ -13,7 +13,12 @@ require_once 'modules/admin/models/ServerPlugin.php';
 
 Class PluginWhmsonic extends ServerPlugin {
 
-    public $usesPackageName = false;
+    public $features = array(
+        'packageName' => false,
+        'testConnection' => false,
+        'showNameservers' => true
+    );
+
     var $host;
     var $user;
     var $password;
