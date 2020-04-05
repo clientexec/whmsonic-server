@@ -11,7 +11,8 @@ require_once 'modules/admin/models/ServerPlugin.php';
 * @email matt@clientexec.com
 */
 
-Class PluginWhmsonic extends ServerPlugin {
+class PluginWhmsonic extends ServerPlugin
+{
 
     public $features = array(
         'packageName' => false,
@@ -27,9 +28,10 @@ Class PluginWhmsonic extends ServerPlugin {
     var $port;
     var $schema;
 
-    function setup ( $args ) {
+    function setup($args)
+    {
 
-        if ( isset($args['server']['variables']['ServerHostName']) && isset($args['server']['variables']['plugin_whmsonic_Username']) && isset($args['server']['variables']['plugin_whmsonic_Password']) && isset($args['server']['variables']['plugin_whmsonic_Use_SSL']) ) {
+        if (isset($args['server']['variables']['ServerHostName']) && isset($args['server']['variables']['plugin_whmsonic_Username']) && isset($args['server']['variables']['plugin_whmsonic_Password']) && isset($args['server']['variables']['plugin_whmsonic_Use_SSL'])) {
             $this->host = $args['server']['variables']['ServerHostName'];
             $this->user = $args['server']['variables']['plugin_whmsonic_Username'];
             $this->password = $args['server']['variables']['plugin_whmsonic_Password'];
@@ -37,35 +39,38 @@ Class PluginWhmsonic extends ServerPlugin {
             $this->port = ( $this->useSSL == true ) ? 2087 : 2086;
             $this->schema = ( $this->useSSL == true ) ? 'https://' : 'http://';
             $this->url = $this->schema . $this->host .':'. $this->port .'/whmsonic/modules/api.php?';
-
         } else {
             throw new CE_Exception('Missing Server Credentials: please fill out all information when editing the server.');
         }
     }
 
-    function email_error ( $name, $message, $params, $args ) {
+    function email_error($name, $message, $params, $args)
+    {
         $error = "WHMSonic Account " .$name." Failed. ";
         $error .= "An email with the Details was sent to ". $args['server']['variables']['plugin_whmsonic_Failure_E-mail'].'<br /><br />';
 
-        if ( is_array($message) ) {
-            $message = implode ( "\n", trim($message) );
+        if (is_array($message)) {
+            $message = implode("\n", trim($message));
         }
 
         CE_Lib::log(1, 'WHMSonic Error: '.print_r(array('type' => $name, 'error' => $error, 'message' => $message, 'params' => $params, 'args' => $args), true));
 
-        if ( !empty($args['server']['variables']['plugin_whmsonic_Failure_E-mail']) ) {
+        if (!empty($args['server']['variables']['plugin_whmsonic_Failure_E-mail'])) {
             $mailGateway = new NE_MailGateway();
-            $mailGateway->mailMessageEmail( $message,
-            $args['server']['variables']['plugin_whmsonic_Failure_E-mail'],
-            "WHMSonic Plugin",
-            $args['server']['variables']['plugin_whmsonic_Failure_E-mail'],
-            "",
-            "WHMSonic Account ".$name." Failure");
+            $mailGateway->mailMessageEmail(
+                $message,
+                $args['server']['variables']['plugin_whmsonic_Failure_E-mail'],
+                "WHMSonic Plugin",
+                $args['server']['variables']['plugin_whmsonic_Failure_E-mail'],
+                "",
+                "WHMSonic Account ".$name." Failure"
+            );
         }
         return $error.nl2br($message);
     }
 
-    function getVariables() {
+    function getVariables()
+    {
 
         $variables = array (
             lang("Name") => array (
@@ -135,35 +140,40 @@ Class PluginWhmsonic extends ServerPlugin {
         return $variables;
     }
 
-    function doDelete($args) {
+    function doDelete($args)
+    {
         $userPackage = new UserPackage($args['userPackageId']);
         $args = $this->buildParams($userPackage);
         $this->delete($args);
         return 'Radio has been deleted.';
     }
 
-    function doCreate($args) {
+    function doCreate($args)
+    {
         $userPackage = new UserPackage($args['userPackageId']);
         $args = $this->buildParams($userPackage);
         $this->create($args);
         return 'Radio has been created.';
     }
 
-    function doSuspend($args) {
+    function doSuspend($args)
+    {
         $userPackage = new UserPackage($args['userPackageId']);
         $args = $this->buildParams($userPackage);
         $this->suspend($args);
         return 'Radio has been suspended.';
     }
 
-    function doUnSuspend($args) {
+    function doUnSuspend($args)
+    {
         $userPackage = new UserPackage($args['userPackageId']);
         $args = $this->buildParams($userPackage);
         $this->unsuspend($args);
         return 'Radio has been unsuspended.';
     }
 
-    function unsuspend($args) {
+    function unsuspend($args)
+    {
         $this->setup($args);
         $userPackage = new UserPackage($args['package']['id']);
         $params = array();
@@ -174,7 +184,8 @@ Class PluginWhmsonic extends ServerPlugin {
         $this->call($params);
     }
 
-    function suspend($args) {
+    function suspend($args)
+    {
         $this->setup($args);
         $userPackage = new UserPackage($args['package']['id']);
         $params = array();
@@ -184,7 +195,8 @@ Class PluginWhmsonic extends ServerPlugin {
         $this->call($params);
     }
 
-    function delete($args) {
+    function delete($args)
+    {
         $this->setup($args);
         $userPackage = new UserPackage($args['package']['id']);
         $params = array();
@@ -192,10 +204,10 @@ Class PluginWhmsonic extends ServerPlugin {
         $params['cmd'] = 'terminate';
         $params['rad_username'] = $userPackage->getCustomField($args['server']['variables']['plugin_whmsonic_Radio_Username_Custom_Field'], CUSTOM_FIELDS_FOR_PACKAGE);
         $this->call($params);
-
     }
 
-    function getAvailableActions($userPackage) {
+    function getAvailableActions($userPackage)
+    {
         $args = $this->buildParams($userPackage);
         $this->setup($args);
         $actions = array();
@@ -207,7 +219,7 @@ Class PluginWhmsonic extends ServerPlugin {
         try {
             $response = $this->call($params);
             $actions[] = 'Delete';
-            if ( $response == 'suspended' ) {
+            if ($response == 'suspended') {
                 $actions[] = 'UnSuspend';
             } else {
                 $actions[] = 'Suspend';
@@ -219,30 +231,31 @@ Class PluginWhmsonic extends ServerPlugin {
         return $actions;
     }
 
-    function create($args) {
+    function create($args)
+    {
         $this->setup($args);
         $userPackage = new UserPackage($args['package']['id']);
 
         // Check to ensure all required addons are set
-        if ( !isset($args['package']['addons']['AUTODJ']) ) {
+        if (!isset($args['package']['addons']['AUTODJ'])) {
             // AutoDJ isn't required, just turn it off if they don't use it.
             $args['package']['addons']['AUTODJ'] = 0;
         }
 
-        if ( !isset($args['package']['addons']['BANDWIDTH']) ) {
-            throw new CE_Exception ('Missing Bandwidth Addon');
+        if (!isset($args['package']['addons']['BANDWIDTH'])) {
+            throw new CE_Exception('Missing Bandwidth Addon');
         }
 
-        if ( !isset($args['package']['addons']['BITRATE']) ) {
-            throw new CE_Exception ('Missing Bitrate Addon');
+        if (!isset($args['package']['addons']['BITRATE'])) {
+            throw new CE_Exception('Missing Bitrate Addon');
         }
 
-        if ( !isset($args['package']['addons']['LISTENERS']) ) {
-            throw new CE_Exception ('Missing Listeners Addon');
+        if (!isset($args['package']['addons']['LISTENERS'])) {
+            throw new CE_Exception('Missing Listeners Addon');
         }
 
         // set autodj var to how WHMSonic wants it
-        if ( $args['package']['addons']['AUTODJ'] == 1 ) {
+        if ($args['package']['addons']['AUTODJ'] == 1) {
             $autoDJ = 'yes';
         } else {
             $autoDJ = 'no';
@@ -266,8 +279,7 @@ Class PluginWhmsonic extends ServerPlugin {
 
     function call($params)
     {
-        if ( !function_exists('curl_init') )
-        {
+        if (!function_exists('curl_init')) {
             throw new CE_Exception('cURL is required in order to connect to WHMSonic');
         }
 
@@ -285,20 +297,19 @@ Class PluginWhmsonic extends ServerPlugin {
 
         $data = curl_exec($ch);
 
-        if ( $data === false )
-        {
+        if ($data === false) {
             $error = "WHMSonic API Request / cURL Error: ".curl_error($ch);
             CE_Lib::log(4, $error);
             throw new CE_Exception($error);
         }
 
         curl_close($ch);
-        if ( $data == "Complete" || $data == 'active' || $data == 'suspended' ) {
+        if ($data == "Complete" || $data == 'active' || $data == 'suspended') {
             return $data;
-        } else if ( strpos($data,"Login Attempt Failed!") == true ) {
+        } elseif (strpos($data, "Login Attempt Failed!") == true) {
             CE_Lib::log(4, 'Error connecting to WHMSonic Server, invalid username/password');
             throw new CE_Exception('Invalid username or password used to connect to WHMSonic server.');
-        }  else {
+        } else {
             CE_Lib::log(4, $data);
             throw new CE_Exception($data);
         }
